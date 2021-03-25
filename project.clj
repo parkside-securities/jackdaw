@@ -1,9 +1,9 @@
-(defproject fundingcircle/jackdaw "_"
+(defproject parksidesecurities/jackdaw "_"
   :description "A Clojure library for the Apache Kafka distributed streaming platform."
 
-  :scm {:name "git" :url "https://github.com/fundingcircle/jackdaw"}
+  :scm {:name "git" :url "https://github.com/parkside-securities/jackdaw"}
 
-  :url "https://github.com/FundingCircle/jackdaw/"
+  :url "https://github.com/parkside-securities/jackdaw/"
 
   :repositories [["confluent" {:url "https://packages.confluent.io/maven/"}]]
 
@@ -37,8 +37,7 @@
                  [io.netty/netty-handler "4.1.59.Final"]
                  [io.netty/netty-handler-proxy "4.1.59.Final"]
                  [io.netty/netty-resolver "4.1.59.Final"]
-                 [io.netty/netty-resolver-dns "4.1.59.Final"]
-                 ]
+                 [io.netty/netty-resolver-dns "4.1.59.Final"]]
 
   :aliases {"kaocha" ["run" "-m" "kaocha.runner"]}
   :aot [jackdaw.serdes.edn2 jackdaw.serdes.fressian jackdaw.serdes.fn-impl]
@@ -62,7 +61,7 @@
 
              ;; Define a profile intended to be shared by this project and its children
              :shared
-             {:url "https://github.com/FundingCircle/jackdaw"
+             {:url "https://github.com/parkside-securities/jackdaw"
               :license {:name "BSD 3-clause"
                         :url "http://opensource.org/licenses/BSD-3-Clause"}
               :repositories
@@ -72,8 +71,7 @@
               :deploy-repositories
               [["clojars" {:url "https://clojars.org/repo/"
                            :username :env/clojars_username
-                           :password :env/clojars_password
-                           :signing {:gpg-key "fundingcirclebot@fundingcircle.com"}}]]}
+                           :password :env/clojars_password}]]}
 
              ;; The dev profile - non-deployment configuration
              :dev
