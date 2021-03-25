@@ -9,7 +9,7 @@
             [jackdaw.streams.lambdas.specs]
             [jackdaw.streams.mock :as mock]
             [jackdaw.streams.protocols
-             :refer [IKStream IKTable IStreamsBuilder]]
+             :refer [IKStreamA IKStreamB IKTable IStreamsBuilder]]
             [jackdaw.streams.specs])
   (:import [java.time Duration]
            [org.apache.kafka.streams.kstream
@@ -34,7 +34,7 @@
           kstream-a (-> streams-builder
                         (k/kstream (mock/topic "topic-a")))]
 
-      (is (satisfies? IKStream kstream-a))))
+      (is (or (satisfies? IKStreamA kstream-a) (satisfies? IKStreamB kstream-a)))))
 
   (testing "kstreams"
     (let [streams-builder (mock/streams-builder)
@@ -42,7 +42,7 @@
                       (k/kstreams [(mock/topic "topic-a")
                                    (mock/topic "topic-b")]))]
 
-      (is (satisfies? IKStream kstream))))
+      (is (or (satisfies? IKStreamA kstream) (satisfies? IKStreamB kstream)))))
 
   (testing "ktable"
     (let [streams-builder (mock/streams-builder)
@@ -187,21 +187,21 @@
   ;; there is no good way to rest this until fix version 2.1.0
   ;; https://issues.apache.org/jira/browse/KAFKA-7326
   #_(testing "print!"
-     (let [std-out System/out
-           mock-out (java.io.ByteArrayOutputStream.)]
+      (let [std-out System/out
+            mock-out (java.io.ByteArrayOutputStream.)]
 
-       (try
-         (System/setOut (java.io.PrintStream. mock-out))
-         (let [topic-a (mock/topic "topic-a")
-               driver (mock/build-driver (fn [builder]
-                                           (-> builder
-                                               (k/kstream topic-a)
-                                               (k/print!))))
-               publish (partial mock/publish driver topic-a)]
-           (publish 1 1)
-           (is (= "[KSTREAM-SOURCE-0000000000]: 1, 2\n" (.toString mock-out))))
-         (finally
-           (System/setOut std-out)))))
+        (try
+          (System/setOut (java.io.PrintStream. mock-out))
+          (let [topic-a (mock/topic "topic-a")
+                driver (mock/build-driver (fn [builder]
+                                            (-> builder
+                                                (k/kstream topic-a)
+                                                (k/print!))))
+                publish (partial mock/publish driver topic-a)]
+            (publish 1 1)
+            (is (= "[KSTREAM-SOURCE-0000000000]: 1, 2\n" (.toString mock-out))))
+          (finally
+            (System/setOut std-out)))))
 
   (testing "through"
     (testing "without partitions"
@@ -237,8 +237,8 @@
         (is (= [{:key 1
                  :value 1
                  :partition 10}] (map #(select-keys % [:key :value :partition])
-                                       (mock/get-records driver
-                                                         topic-b))))
+                                      (mock/get-records driver
+                                                        topic-b))))
 
         (is (= [[1 1]] (mock/get-keyvals driver topic-c))))))
 
@@ -436,12 +436,12 @@
     (let [topic-a (mock/topic "topic-a")
           topic-b (mock/topic "topic-b")
           transformer-supplier-fn #(let [total (atom 0)]
-                                    (reify Transformer
-                                      (init [_ _])
-                                      (close [_])
-                                      (transform [_ k v]
-                                        (swap! total + v)
-                                        (key-value [(* k 2) @total]))))
+                                     (reify Transformer
+                                       (init [_ _])
+                                       (close [_])
+                                       (transform [_ k v]
+                                         (swap! total + v)
+                                         (key-value [(* k 2) @total]))))
           driver (mock/build-driver (fn [builder]
                                       (-> builder
                                           (k/kstream topic-a)
@@ -462,12 +462,12 @@
     (let [topic-a (mock/topic "topic-a")
           topic-b (mock/topic "topic-b")
           transformer-supplier-fn #(let [total (atom 0)]
-                                    (reify ValueTransformer
-                                      (init [_ _])
-                                      (close [_])
-                                      (transform [_ v]
-                                        (swap! total + v)
-                                        @total)))
+                                     (reify ValueTransformer
+                                       (init [_ _])
+                                       (close [_])
+                                       (transform [_ v]
+                                         (swap! total + v)
+                                         @total)))
           driver (mock/build-driver (fn [builder]
                                       (-> builder
                                           (k/kstream topic-a)

@@ -73,7 +73,7 @@
     [kstream-or-ktable file-path topic-config]
     "Writes the elements of a stream to a file at the given path."))
 
-(defprotocol IKStream
+(defprotocol IKStreamA
   "A KStream is an abstraction of a stream of key-value pairs."
   (branch
     [kstream predicate-fns]
@@ -112,8 +112,9 @@
   (group-by-key
     [kstream]
     [kstream topic-config]
-    "Groups records with the same key into a KGroupedStream.")
+    "Groups records with the same key into a KGroupedStream."))
 
+(defprotocol IKStreamB
   (join-windowed
     [kstream other-kstream value-joiner-fn windows]
     [kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config]

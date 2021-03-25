@@ -190,7 +190,7 @@
     (clj-kstream
      (.mapValues kstream ^ValueMapper (value-mapper value-mapper-fn))))
 
-  IKStream
+  IKStreamA
   (branch
     [_ predicate-fns]
     (mapv clj-kstream
@@ -237,7 +237,7 @@
     (clj-kgroupedstream
      (.groupByKey ^KStream kstream
                   ^Serialized (topic->serialized topic-config))))
-
+  IKStreamB
   (join-windowed
     [_ other-kstream value-joiner-fn windows]
     (clj-kstream

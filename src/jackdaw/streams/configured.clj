@@ -136,7 +136,7 @@
     [_ topic-config]
     (to! kstream topic-config))
 
-  IKStream
+  IKStreamA
   (branch
     [_ predicate-fns]
     (mapv (partial configured-kstream config)
@@ -170,6 +170,7 @@
      config
      (group-by-key kstream topic-config)))
 
+  IKStreamB
   (join-windowed
     [_ other-kstream value-joiner-fn windows]
     (configured-kstream
