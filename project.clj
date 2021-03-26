@@ -40,7 +40,7 @@
                  [io.netty/netty-resolver-dns "4.1.59.Final"]]
 
   :aliases {"kaocha" ["run" "-m" "kaocha.runner"]}
-  :aot [jackdaw.serdes.edn2 jackdaw.serdes.fressian jackdaw.serdes.fn-impl]
+  :aot [jackdaw.serdes.edn2 jackdaw.serdes.fn-impl]
   :plugins [[me.arrdem/lein-git-version "2.0.8"]]
 
   :git-version
