@@ -60,7 +60,9 @@
   ([kstream ktable value-joiner-fn]
    (p/left-join kstream ktable value-joiner-fn))
   ([kstream ktable value-joiner-fn this-topic-config other-topic-config]
-   (p/left-join kstream ktable value-joiner-fn this-topic-config other-topic-config)))
+   (p/left-join kstream ktable value-joiner-fn this-topic-config other-topic-config))
+  ([kstream ktable value-joiner-fn this-topic-config other-topic-config join-name]
+   (p/left-join kstream ktable value-joiner-fn this-topic-config other-topic-config join-name)))
 
 (defn filter
   [kstream predicate-fn]

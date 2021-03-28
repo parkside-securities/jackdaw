@@ -86,6 +86,12 @@
      config
      (left-join kstream ktable value-joiner-fn topic-config other-topic-config)))
 
+  (left-join
+    [_ ktable value-joiner-fn topic-config other-topic-config join-name]
+    (configured-kstream
+     config
+     (left-join kstream ktable value-joiner-fn topic-config other-topic-config join-name)))
+
   (filter
     [_ predicate-fn]
     (configured-kstream

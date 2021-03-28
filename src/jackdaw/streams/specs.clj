@@ -109,7 +109,8 @@
                :ktable ktable?
                :value-joiner-fn ifn?
                :this-topic-config (s/? ::topic-config)
-               :other-topic-config (s/? ::topic-config))
+               :other-topic-config (s/? ::topic-config)
+               :join-name (s/? string?))
   :ret ::kstream-or-ktable)
 
 (s/fdef k/for-each!
