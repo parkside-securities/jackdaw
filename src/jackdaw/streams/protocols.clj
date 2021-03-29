@@ -176,7 +176,8 @@
     [kstream global-ktable kv-mapper joiner])
 
   (left-join-global
-    [kstream global-ktable kv-mapper joiner])
+    [kstream global-ktable kv-mapper joiner]
+    [kstream global-ktable kv-mapper joiner join-name])
 
   (kstream*
     [kstream]

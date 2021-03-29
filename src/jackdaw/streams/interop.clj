@@ -22,7 +22,7 @@
             KeyValueMapper Materialized Merger Predicate Printed Produced
             Reducer Serialized SessionWindowedKStream SessionWindows
             Suppressed Suppressed$BufferConfig TimeWindowedKStream ValueJoiner
-            ValueMapper ValueMapperWithKey ValueTransformerSupplier Windows]
+            ValueMapper ValueMapperWithKey ValueTransformerSupplier Windows Named]
            [org.apache.kafka.streams.processor
             StreamPartitioner]))
 
@@ -42,8 +42,8 @@
 (defn topic->materialized [{:keys [topic-name key-serde value-serde]}]
   (if topic-name
     (cond-> (Materialized/as ^String topic-name)
-            key-serde (.withKeySerde key-serde)
-            value-serde (.withValueSerde value-serde))
+      key-serde (.withKeySerde key-serde)
+      value-serde (.withValueSerde value-serde))
     (Materialized/with key-serde
                        value-serde)))
 
@@ -319,8 +319,8 @@
   (merge
     [_ other-kstream]
     (clj-kstream
-      (.merge kstream
-              ^KStream (kstream* other-kstream))))
+     (.merge kstream
+             ^KStream (kstream* other-kstream))))
 
   (outer-join-windowed
     [_ other-kstream value-joiner-fn windows]
@@ -403,6 +403,15 @@
                 ^KeyValueMapper (select-key-value-mapper key-value-mapper-fn)
                 ^ValueJoiner (value-joiner joiner-fn))))
 
+  (left-join-global
+    [_ global-ktable key-value-mapper-fn joiner-fn join-name]
+    (clj-kstream
+     (.leftJoin kstream
+                ^GlobalKTable (global-ktable* global-ktable)
+                ^KeyValueMapper (select-key-value-mapper key-value-mapper-fn)
+                ^ValueJoiner (value-joiner joiner-fn)
+                (Named/as join-name))))
+
   (kstream* [_]
     kstream))
 
@@ -467,7 +476,7 @@
   (suppress
     [_ suppress-config]
     (clj-ktable
-       (.suppress ^KTable ktable (suppress-config->suppressed suppress-config))))
+     (.suppress ^KTable ktable (suppress-config->suppressed suppress-config))))
 
   (to-kstream
     [_]

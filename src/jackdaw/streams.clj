@@ -215,8 +215,10 @@
   (p/join-global kstream global-ktable kv-mapper joiner))
 
 (defn left-join-global
-  [kstream global-ktable kv-mapper joiner]
-  (p/left-join-global kstream global-ktable kv-mapper joiner))
+  ([kstream global-ktable kv-mapper joiner]
+   (p/left-join-global kstream global-ktable kv-mapper joiner))
+  ([kstream global-ktable kv-mapper joiner]
+   (p/left-join-global kstream global-ktable kv-mapper joiner join-name)))
 
 (defn merge
   [kstream other]
