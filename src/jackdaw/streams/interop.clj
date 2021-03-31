@@ -22,7 +22,7 @@
             KeyValueMapper Materialized Merger Predicate Printed Produced
             Reducer Serialized SessionWindowedKStream SessionWindows
             Suppressed Suppressed$BufferConfig TimeWindowedKStream ValueJoiner
-            ValueMapper ValueMapperWithKey ValueTransformerSupplier Windows Named]
+            ValueMapper ValueMapperWithKey ValueTransformerSupplier Windows Named StreamJoined]
            [org.apache.kafka.streams.processor
             StreamPartitioner]))
 
@@ -278,7 +278,7 @@
             ^KStream (kstream* other-kstream)
             ^ValueJoiner (value-joiner value-joiner-fn)
             ^JoinWindows windows
-            (Joined/with key-serde this-value-serde other-value-serde join-name))))
+            (.withStoreName (.withName (StreamJoined/with key-serde this-value-serde other-value-serde) join-name) (str join-name "-store")))))
 
   (left-join-windowed
     [_ other-kstream value-joiner-fn windows]
