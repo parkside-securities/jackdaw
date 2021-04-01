@@ -135,7 +135,7 @@ jobs:
       - run:
           name: Prepare signing key
           command: |
-            echo $GPG_PRIVATE_KEY |base64 --decode |gpg --yes --batch --import
+            echo -e $GPG_PRIVATE_KEY |gpg --yes  --import
 
       - run:
           name: Deploy to Clojars

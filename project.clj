@@ -71,7 +71,7 @@
               [["clojars" {:url "https://clojars.org/repo/"
                            :username :env/clojars_username
                            :password :env/clojars_password
-                           :sign-releases false}]]}
+                           :signing {:gpg-key "jiezhen@parkside.app"}}]]}
 
              ;; The dev profile - non-deployment configuration
              :dev
