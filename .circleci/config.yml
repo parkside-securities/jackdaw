@@ -133,9 +133,17 @@ jobs:
       - *restore_repo
       - *restore_mvn
       - run:
+          name: Prepare signing key
+          command: |
+            echo $GPG_PRIVATE_KEY |base64 --decode |gpg --yes --batch --import
+
+      - run:
           name: Deploy to Clojars
           command: |
-            [ -z "$CLOJARS_USERNAME" ] || lein do jar, pom, deploy clojars
+            export LEIN_GPG=/home/circleci/jackdaw/.circleci/bin/gpg
+            export REAL_GPG=$(which gpg)
+
+            lein do jar, pom, deploy clojars
 
   deploy_snapshot:
     <<: *deploy_config
@@ -182,6 +190,6 @@ workflows:
             - checkout_tags
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+.*$/
+              only: /^\d+\.\d+\.\d+$.*/
             branches:
               ignore: /.*/
