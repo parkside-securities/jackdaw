@@ -274,11 +274,12 @@
      {other-value-serde :value-serde}
      join-name]
     (clj-kstream
-     (.join kstream
-            ^KStream (kstream* other-kstream)
-            ^ValueJoiner (value-joiner value-joiner-fn)
-            ^JoinWindows windows
-            (.withStoreName (.withName (StreamJoined/with key-serde this-value-serde other-value-serde) join-name) (str join-name "-store")))))
+     (let [stream-joined (StreamJoined/with key-serde this-value-serde other-value-serde)]
+       (.join kstream
+              ^KStream (kstream* other-kstream)
+              ^ValueJoiner (value-joiner value-joiner-fn)
+              ^JoinWindows windows
+              (.withStoreName ^StreamJoined (.withName ^StreamJoined stream-joined join-name) (str join-name "-store"))))))
 
   (left-join-windowed
     [_ other-kstream value-joiner-fn windows]
