@@ -78,10 +78,6 @@
   "A KStream is an abstraction of a stream of key-value pairs."
   (branch
     [kstream predicate-fns]
-    "Returns a list of KStreams, one for each of the `predicate-fns`
-    provided.")
-
-  (branch
     [kstream name predicate-fns]
     "Returns a list of KStreams, one for each of the `predicate-fns`
     provided.")
