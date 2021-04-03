@@ -48,7 +48,7 @@
                        value-serde)))
 
 (defn suppress-config->suppressed
-  [{:keys [max-records max-bytes until-time-limit-ms]}]
+  [{:keys [max-records max-bytes until-time-limit-ms name]}]
   (let [config (cond
                  (not (nil? max-records))
                  (Suppressed$BufferConfig/maxRecords max-records)
@@ -56,11 +56,14 @@
                  (not (nil? max-bytes))
                  (Suppressed$BufferConfig/maxBytes max-bytes)
 
-                 :else (Suppressed$BufferConfig/unbounded))]
-    (if-some [time-limit until-time-limit-ms]
-      (Suppressed/untilTimeLimit (Duration/ofMillis time-limit) config)
-      (-> (.shutDownWhenFull ^Suppressed$BufferConfig config)
-          Suppressed/untilWindowCloses))))
+                 :else (Suppressed$BufferConfig/unbounded))
+        suppressed (if-some [time-limit until-time-limit-ms]
+                     (Suppressed/untilTimeLimit (Duration/ofMillis time-limit) config)
+                     (-> (.shutDownWhenFull ^Suppressed$BufferConfig config)
+                         Suppressed/untilWindowCloses))]
+    (if name
+      (.withName suppressed name)
+      suppressed)))
 
 (declare clj-kstream clj-ktable clj-kgroupedtable clj-kgroupedstream
          clj-global-ktable clj-session-windowed-kstream
