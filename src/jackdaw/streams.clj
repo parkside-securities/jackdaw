@@ -117,6 +117,12 @@
   [kstream predicate-fns]
   (p/branch kstream predicate-fns))
 
+(defn branch
+  "Returns a list of KStreams, one for each of the `predicate-fns`
+  provided."
+  [kstream name predicate-fns]
+  (p/branch kstream name predicate-fns))
+
 (defn flat-map
   "Creates a KStream that will consist of the concatenation of messages
   returned by calling `key-value-mapper-fn` on each key/value pair in the

@@ -148,6 +148,7 @@
 
 (s/fdef k/branch
   :args (s/cat :kstream kstream?
+               :name (s/? string?)
                :predicate-fns (s/coll-of ifn?))
   :ret (s/coll-of kstream?))
 
