@@ -7,7 +7,7 @@
             [jackdaw.streams.lambdas :as lambdas]
             [jackdaw.streams.protocols
              :refer [IStreamsBuilder IGlobalKTable IKGroupedTable
-                     IKGroupedStream IKStream IKTable
+                     IKGroupedStream IKStreamA IKStreamB IKTable
                      ITimeWindowedKStream ISessionWindowedKStream]])
   (:import org.apache.kafka.common.serialization.Serde
            org.apache.kafka.streams.kstream.JoinWindows))
@@ -32,8 +32,11 @@
 (def kgroupedtable?
   (partial satisfies? IKGroupedTable))
 
+(defn is-kstream? [stream]
+  (or (satisfies? IKStreamA stream) (satisfies? IKStreamB stream)))
+
 (def kstream?
-  (partial satisfies? IKStream))
+  (partial is-kstream?))
 
 (def ktable?
   (partial satisfies? IKTable))
@@ -102,12 +105,13 @@
 ;; IKStreamBase
 
 (s/fdef k/left-join
-        :args (s/cat :kstream-or-ktable ::kstream-or-ktable
-                     :ktable ktable?
-                     :value-joiner-fn ifn?
-                     :this-topic-config (s/? ::topic-config)
-                     :other-topic-config (s/? ::topic-config))
-        :ret ::kstream-or-ktable)
+  :args (s/cat :kstream-or-ktable ::kstream-or-ktable
+               :ktable ktable?
+               :value-joiner-fn ifn?
+               :this-topic-config (s/? ::topic-config)
+               :other-topic-config (s/? ::topic-config)
+               :join-name (s/? string?))
+  :ret ::kstream-or-ktable)
 
 (s/fdef k/for-each!
         :args (s/cat :kstream-or-ktable ::kstream-or-ktable
@@ -143,9 +147,10 @@
 ;; IKStream
 
 (s/fdef k/branch
-        :args (s/cat :kstream kstream?
-                     :predicate-fns (s/coll-of ifn?))
-        :ret (s/coll-of kstream?))
+  :args (s/cat :kstream kstream?
+               :name (s/? string?)
+               :predicate-fns (s/coll-of ifn?))
+  :ret (s/coll-of kstream?))
 
 (s/fdef k/flat-map
         :args (s/cat :kstream kstream?
@@ -176,22 +181,24 @@
         :ret kgroupedstream?)
 
 (s/fdef k/join-windowed
-        :args (s/cat :kstream kstream?
-                     :other-kstream kstream?
-                     :value-joiner-fn ifn?
-                     :windows join-windows?
-                     :this-topic-config (s/? ::topic-config)
-                     :other-topic-config (s/? ::topic-config))
-        :ret kstream?)
+  :args (s/cat :kstream kstream?
+               :other-kstream kstream?
+               :value-joiner-fn ifn?
+               :windows join-windows?
+               :this-topic-config (s/? ::topic-config)
+               :other-topic-config (s/? ::topic-config)
+               :join-name (s/? string?))
+  :ret kstream?)
 
 (s/fdef k/left-join-windowed
-        :args (s/cat :kstream kstream?
-                     :other-kstream kstream?
-                     :value-joiner-fn ifn?
-                     :windows join-windows?
-                     :this-topic-config (s/? ::topic-config)
-                     :other-topic-config (s/? ::topic-config))
-        :ret kstream?)
+  :args (s/cat :kstream kstream?
+               :other-kstream kstream?
+               :value-joiner-fn ifn?
+               :windows join-windows?
+               :this-topic-config (s/? ::topic-config)
+               :other-topic-config (s/? ::topic-config)
+               :join-name (s/? string?))
+  :ret kstream?)
 
 (s/fdef k/map
         :args (s/cat :kstream kstream?
@@ -204,13 +211,14 @@
         :ret kstream?)
 
 (s/fdef k/outer-join-windowed
-        :args (s/cat :kstream kstream?
-                     :other-kstream kstream?
-                     :value-joiner-fn ifn?
-                     :windows join-windows?
-                     :this-topic-config (s/? ::topic-config)
-                     :other-topic-config (s/? ::topic-config))
-        :ret kstream?)
+  :args (s/cat :kstream kstream?
+               :other-kstream kstream?
+               :value-joiner-fn ifn?
+               :windows join-windows?
+               :this-topic-config (s/? ::topic-config)
+               :other-topic-config (s/? ::topic-config)
+               :join-name (s/? string?))
+  :ret kstream?)
 
 (s/fdef k/process!
         :args (s/cat :kstream kstream?
@@ -242,11 +250,12 @@
         :ret kstream?)
 
 (s/fdef k/left-join-global
-        :args (s/cat :kstream kstream?
-                     :global-ktable global-ktable?
-                     :kv-mapper ifn?
-                     :joiner ifn?)
-        :ret kstream?)
+  :args (s/cat :kstream kstream?
+               :global-ktable global-ktable?
+               :kv-mapper ifn?
+               :joiner ifn?
+               :join-name (s/? string?))
+  :ret kstream?)
 
 (s/fdef k/kstream*
         :args (s/cat :kstream kstream?)

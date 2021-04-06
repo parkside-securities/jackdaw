@@ -1,9 +1,9 @@
-(defproject fundingcircle/jackdaw "_"
+(defproject com.github.parkside-securities/jackdaw "_"
   :description "A Clojure library for the Apache Kafka distributed streaming platform."
 
-  :scm {:name "git" :url "https://github.com/fundingcircle/jackdaw"}
+  :scm {:name "git" :url "https://github.com/parkside-securities/jackdaw"}
 
-  :url "https://github.com/FundingCircle/jackdaw/"
+  :url "https://github.com/parkside-securities/jackdaw/"
 
   :repositories [["confluent" {:url "https://packages.confluent.io/maven/"}]]
 
@@ -15,13 +15,12 @@
                  ;; Confluent does paired releases with Kafka, this should tie
                  ;; off with the kafka version.
                  ;; See https://docs.confluent.io/current/release-notes.html
-                 [io.confluent/kafka-schema-registry-client "5.3.1"
+                 [io.confluent/kafka-schema-registry-client "6.1.1"
                   :exclusions [com.fasterxml.jackson.core/jackson-databind]]
-                 [io.confluent/kafka-avro-serializer "5.3.1"]
-                 [org.apache.kafka/kafka-clients "2.3.1"]
-                 [org.apache.kafka/kafka-streams "2.3.1"]
-                 [org.apache.kafka/kafka-streams-test-utils "2.3.1"]
-
+                 [io.confluent/kafka-avro-serializer "6.1.1"]
+                 [org.apache.kafka/kafka-clients "2.7.0"]
+                 [org.apache.kafka/kafka-streams "2.7.0"]
+                 [org.apache.kafka/kafka-streams-test-utils "2.7.0"]
                  [org.clojure/clojure "1.10.1" :scope "provided"]
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/data.fressian "0.2.1"]
@@ -37,11 +36,10 @@
                  [io.netty/netty-handler "4.1.59.Final"]
                  [io.netty/netty-handler-proxy "4.1.59.Final"]
                  [io.netty/netty-resolver "4.1.59.Final"]
-                 [io.netty/netty-resolver-dns "4.1.59.Final"]
-                 ]
+                 [io.netty/netty-resolver-dns "4.1.59.Final"]]
 
   :aliases {"kaocha" ["run" "-m" "kaocha.runner"]}
-  :aot [jackdaw.serdes.edn2 jackdaw.serdes.fressian jackdaw.serdes.fn-impl]
+  :aot [jackdaw.serdes.edn2 jackdaw.serdes.fn-impl]
   :plugins [[me.arrdem/lein-git-version "2.0.8"]]
 
   :git-version
@@ -62,7 +60,7 @@
 
              ;; Define a profile intended to be shared by this project and its children
              :shared
-             {:url "https://github.com/FundingCircle/jackdaw"
+             {:url "https://github.com/parkside-securities/jackdaw"
               :license {:name "BSD 3-clause"
                         :url "http://opensource.org/licenses/BSD-3-Clause"}
               :repositories
@@ -73,7 +71,7 @@
               [["clojars" {:url "https://clojars.org/repo/"
                            :username :env/clojars_username
                            :password :env/clojars_password
-                           :signing {:gpg-key "fundingcirclebot@fundingcircle.com"}}]]}
+                           :signing {:gpg-key "jiezhen@parkside.app"}}]]}
 
              ;; The dev profile - non-deployment configuration
              :dev
@@ -83,10 +81,10 @@
               :resource-paths ["test/resources"]
               :injections [(require 'io.aviso.logging.setup)]
               :dependencies [[io.aviso/logging "0.3.2"]
-                             [org.apache.kafka/kafka-streams-test-utils "2.3.1"]
-                             [org.apache.kafka/kafka-clients "2.3.1" :classifier "test"]
+                             [org.apache.kafka/kafka-streams-test-utils "2.7.0"]
+                             [org.apache.kafka/kafka-clients "2.7.0" :classifier "test"]
                              [org.clojure/test.check "0.9.0"]
-                             [org.apache.kafka/kafka_2.11 "2.3.1"]
+                             [org.apache.kafka/kafka_2.11 "2.4.1"]
                              [lambdaisland/kaocha "0.0-529"]
                              [lambdaisland/kaocha-cloverage "0.0-32"]
                              [lambdaisland/kaocha-junit-xml "0.0-70"]]}

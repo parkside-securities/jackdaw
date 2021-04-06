@@ -22,7 +22,7 @@
             KeyValueMapper Materialized Merger Predicate Printed Produced
             Reducer Serialized SessionWindowedKStream SessionWindows
             Suppressed Suppressed$BufferConfig TimeWindowedKStream ValueJoiner
-            ValueMapper ValueMapperWithKey ValueTransformerSupplier Windows]
+            ValueMapper ValueMapperWithKey ValueTransformerSupplier Windows Named StreamJoined]
            [org.apache.kafka.streams.processor
             StreamPartitioner]))
 
@@ -40,12 +40,15 @@
   (Serialized/with key-serde value-serde))
 
 (defn topic->materialized [{:keys [topic-name key-serde value-serde]}]
-  (cond-> (Materialized/as ^String topic-name)
-    key-serde (.withKeySerde key-serde)
-    value-serde (.withValueSerde value-serde)))
+  (if topic-name
+    (cond-> (Materialized/as ^String topic-name)
+      key-serde (.withKeySerde key-serde)
+      value-serde (.withValueSerde value-serde))
+    (Materialized/with key-serde
+                       value-serde)))
 
 (defn suppress-config->suppressed
-  [{:keys [max-records max-bytes until-time-limit-ms]}]
+  [{:keys [max-records max-bytes until-time-limit-ms name]}]
   (let [config (cond
                  (not (nil? max-records))
                  (Suppressed$BufferConfig/maxRecords max-records)
@@ -53,11 +56,14 @@
                  (not (nil? max-bytes))
                  (Suppressed$BufferConfig/maxBytes max-bytes)
 
-                 :else (Suppressed$BufferConfig/unbounded))]
-    (if-some [time-limit until-time-limit-ms]
-      (Suppressed/untilTimeLimit (Duration/ofMillis time-limit) config)
-      (-> (.shutDownWhenFull ^Suppressed$BufferConfig config)
-          Suppressed/untilWindowCloses))))
+                 :else (Suppressed$BufferConfig/unbounded))
+        suppressed (if-some [time-limit until-time-limit-ms]
+                     (Suppressed/untilTimeLimit (Duration/ofMillis time-limit) config)
+                     (-> (.shutDownWhenFull ^Suppressed$BufferConfig config)
+                         Suppressed/untilWindowCloses))]
+    (if name
+      (.withName suppressed name)
+      suppressed)))
 
 (declare clj-kstream clj-ktable clj-kgroupedtable clj-kgroupedstream
          clj-global-ktable clj-session-windowed-kstream
@@ -155,6 +161,17 @@
                 ^ValueJoiner (value-joiner value-joiner-fn)
                 (Joined/with key-serde this-value-serde other-value-serde))))
 
+  (left-join
+    [_ ktable value-joiner-fn
+     {key-serde :key-serde this-value-serde :value-serde}
+     {other-value-serde :value-serde}
+     join-name]
+    (clj-kstream
+     (.leftJoin kstream
+                ^KTable (ktable* ktable)
+                ^ValueJoiner (value-joiner value-joiner-fn)
+                (Joined/with key-serde this-value-serde other-value-serde join-name))))
+
   (peek
     [_ peek-fn]
     (clj-kstream
@@ -187,12 +204,18 @@
     (clj-kstream
      (.mapValues kstream ^ValueMapper (value-mapper value-mapper-fn))))
 
-  IKStream
+  IKStreamA
   (branch
     [_ predicate-fns]
     (mapv clj-kstream
           (->> (into-array Predicate (mapv predicate predicate-fns))
                (.branch kstream))))
+
+  (branch
+    [_ name predicate-fns]
+    (mapv clj-kstream
+          (->> (into-array Predicate (mapv predicate predicate-fns))
+               (.branch kstream (Named/as name)))))
 
   (flat-map
     [_ key-value-mapper-fn]
@@ -234,7 +257,7 @@
     (clj-kgroupedstream
      (.groupByKey ^KStream kstream
                   ^Serialized (topic->serialized topic-config))))
-
+  IKStreamB
   (join-windowed
     [_ other-kstream value-joiner-fn windows]
     (clj-kstream
@@ -253,6 +276,19 @@
             ^ValueJoiner (value-joiner value-joiner-fn)
             ^JoinWindows windows
             (Joined/with key-serde this-value-serde other-value-serde))))
+
+  (join-windowed
+    [_ other-kstream value-joiner-fn windows
+     {key-serde :key-serde this-value-serde :value-serde}
+     {other-value-serde :value-serde}
+     join-name]
+    (clj-kstream
+     (let [stream-joined (StreamJoined/with key-serde this-value-serde other-value-serde)]
+       (.join kstream
+              ^KStream (kstream* other-kstream)
+              ^ValueJoiner (value-joiner value-joiner-fn)
+              ^JoinWindows windows
+              (.withStoreName ^StreamJoined (.withName ^StreamJoined stream-joined join-name) (str join-name "-store"))))))
 
   (left-join-windowed
     [_ other-kstream value-joiner-fn windows]
@@ -273,6 +309,18 @@
                 ^JoinWindows windows
                 (Joined/with key-serde value-serde other-value-serde))))
 
+  (left-join-windowed
+    [_ other-kstream value-joiner-fn windows
+     {:keys [key-serde value-serde]}
+     {other-value-serde :value-serde}
+     join-name]
+    (clj-kstream
+     (.leftJoin kstream
+                ^KStream (kstream* other-kstream)
+                ^ValueJoiner (value-joiner value-joiner-fn)
+                ^JoinWindows windows
+                (Joined/with key-serde value-serde other-value-serde join-name))))
+
   (map
     [_ key-value-mapper-fn]
     (clj-kstream
@@ -281,8 +329,8 @@
   (merge
     [_ other-kstream]
     (clj-kstream
-      (.merge kstream
-              ^KStream (kstream* other-kstream))))
+     (.merge kstream
+             ^KStream (kstream* other-kstream))))
 
   (outer-join-windowed
     [_ other-kstream value-joiner-fn windows]
@@ -302,6 +350,18 @@
                  ^ValueJoiner (value-joiner value-joiner-fn)
                  ^JoinWindows windows
                  (Joined/with key-serde value-serde other-value-serde))))
+
+  (outer-join-windowed
+    [_ other-kstream value-joiner-fn windows
+     {key-serde :key-serde value-serde :value-serde}
+     {other-value-serde :value-serde}
+     join-name]
+    (clj-kstream
+     (.outerJoin ^KStream kstream
+                 ^KStream (kstream* other-kstream)
+                 ^ValueJoiner (value-joiner value-joiner-fn)
+                 ^JoinWindows windows
+                 (Joined/with key-serde value-serde other-value-serde join-name))))
 
   (process!
     [_ processor-supplier-fn state-store-names]
@@ -352,6 +412,15 @@
                 ^GlobalKTable (global-ktable* global-ktable)
                 ^KeyValueMapper (select-key-value-mapper key-value-mapper-fn)
                 ^ValueJoiner (value-joiner joiner-fn))))
+
+  (left-join-global
+    [_ global-ktable key-value-mapper-fn joiner-fn join-name]
+    (clj-kstream
+     (.leftJoin kstream
+                ^GlobalKTable (global-ktable* global-ktable)
+                ^KeyValueMapper (select-key-value-mapper key-value-mapper-fn)
+                ^ValueJoiner (value-joiner joiner-fn)
+                (Named/as join-name))))
 
   (kstream* [_]
     kstream))
