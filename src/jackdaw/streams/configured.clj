@@ -150,7 +150,7 @@
   (branch
     [_ name predicate-fns]
     (mapv (partial configured-kstream config)
-          (branch name kstream predicate-fns)))
+          (branch kstream name predicate-fns)))
   (flat-map
     [_ key-value-mapper-fn]
     (configured-kstream
