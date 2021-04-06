@@ -215,7 +215,7 @@
     [_ name predicate-fns]
     (mapv clj-kstream
           (->> (into-array Predicate (mapv predicate predicate-fns))
-               (.branch kstream name))))
+               (.branch kstream (Named/as name)))))
 
   (flat-map
     [_ key-value-mapper-fn]
