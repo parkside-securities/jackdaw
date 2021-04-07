@@ -246,7 +246,8 @@
         :args (s/cat :kstream kstream?
                      :global-ktable global-ktable?
                      :kv-mapper ifn?
-                     :joiner ifn?)
+                     :joiner ifn?
+                     :join-name (s/? string?))
         :ret kstream?)
 
 (s/fdef k/left-join-global

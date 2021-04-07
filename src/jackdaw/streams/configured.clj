@@ -47,8 +47,8 @@
   (global-ktable
     [_ topic-config]
     (configured-global-ktable
-      config
-      (global-ktable streams-builder topic-config)))
+     config
+     (global-ktable streams-builder topic-config)))
 
   (source-topics
     [_]
@@ -81,8 +81,8 @@
      (left-join kstream ktable value-joiner-fn)))
 
   (left-join
-   [_ ktable value-joiner-fn topic-config other-topic-config]
-   (configured-kstream
+    [_ ktable value-joiner-fn topic-config other-topic-config]
+    (configured-kstream
      config
      (left-join kstream ktable value-joiner-fn topic-config other-topic-config)))
 
@@ -250,9 +250,9 @@
   (merge
     [_ other-kstream]
     (configured-kstream
-      config
-      (merge kstream
-             other-kstream)))
+     config
+     (merge kstream
+            other-kstream)))
 
   (outer-join-windowed
     [_ other-kstream value-joiner-fn windows]
@@ -297,7 +297,7 @@
      (select-key kstream key-value-mapper-fn)))
 
   (transform
-      [this transformer-supplier-fn]
+    [this transformer-supplier-fn]
     (transform this transformer-supplier-fn []))
 
   (transform
@@ -307,7 +307,7 @@
      (transform kstream transformer-supplier-fn state-store-names)))
 
   (transform-values
-      [this value-transformer-supplier-fn]
+    [this value-transformer-supplier-fn]
     (transform-values this value-transformer-supplier-fn []))
 
   (transform-values
@@ -319,8 +319,8 @@
   (left-join-global
     [_ global-ktable kv-mapper joiner]
     (configured-kstream
-      config
-      (left-join-global kstream global-ktable kv-mapper joiner)))
+     config
+     (left-join-global kstream global-ktable kv-mapper joiner)))
 
   (left-join-global
     [_ global-ktable kv-mapper joiner join-name]
@@ -331,8 +331,14 @@
   (join-global
     [_ global-ktable kv-mapper joiner]
     (configured-kstream
-      config
-      (join-global kstream global-ktable kv-mapper joiner)))
+     config
+     (join-global kstream global-ktable kv-mapper joiner)))
+
+  (join-global
+    [_ global-ktable kv-mapper joiner]
+    (configured-kstream
+     config
+     (join-global kstream global-ktable kv-mapper joiner join-name)))
 
   (kstream* [_]
     (kstream* kstream))

@@ -213,8 +213,10 @@
    (p/transform-values kstream value-transformer-supplier-fn state-store-names)))
 
 (defn join-global
-  [kstream global-ktable kv-mapper joiner]
-  (p/join-global kstream global-ktable kv-mapper joiner))
+  ([kstream global-ktable kv-mapper joiner]
+   (p/join-global kstream global-ktable kv-mapper joiner))
+  ([kstream global-ktable kv-mapper joiner join-name]
+   (p/join-global kstream global-ktable kv-mapper joiner join-name)))
 
 (defn left-join-global
   ([kstream global-ktable kv-mapper joiner]
