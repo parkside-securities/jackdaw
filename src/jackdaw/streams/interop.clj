@@ -405,6 +405,15 @@
             ^KeyValueMapper (select-key-value-mapper key-value-mapper-fn)
             ^ValueJoiner (value-joiner joiner-fn))))
 
+  (join-global
+    [_ global-ktable key-value-mapper-fn joiner-fn join-name]
+    (clj-kstream
+     (.join kstream
+            ^GlobalKTable (global-ktable* global-ktable)
+            ^KeyValueMapper (select-key-value-mapper key-value-mapper-fn)
+            ^ValueJoiner (value-joiner joiner-fn)
+            (Named/as join-name))))
+
   (left-join-global
     [_ global-ktable key-value-mapper-fn joiner-fn]
     (clj-kstream
@@ -486,7 +495,7 @@
   (suppress
     [_ suppress-config]
     (clj-ktable
-       (.suppress ^KTable ktable (suppress-config->suppressed suppress-config))))
+     (.suppress ^KTable ktable (suppress-config->suppressed suppress-config))))
 
   (to-kstream
     [_]

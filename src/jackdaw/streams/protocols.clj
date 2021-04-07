@@ -174,7 +174,8 @@
     to each value in the input stream.")
 
   (join-global
-    [kstream global-ktable kv-mapper joiner])
+    [kstream global-ktable kv-mapper joiner]
+    [kstream global-ktable kv-mapper joiner join-name])
 
   (left-join-global
     [kstream global-ktable kv-mapper joiner]
