@@ -47,8 +47,8 @@
   (global-ktable
     [_ topic-config]
     (configured-global-ktable
-      config
-      (global-ktable streams-builder topic-config)))
+     config
+     (global-ktable streams-builder topic-config)))
 
   (source-topics
     [_]
@@ -81,10 +81,16 @@
      (left-join kstream ktable value-joiner-fn)))
 
   (left-join
-   [_ ktable value-joiner-fn topic-config other-topic-config]
-   (configured-kstream
+    [_ ktable value-joiner-fn topic-config other-topic-config]
+    (configured-kstream
      config
      (left-join kstream ktable value-joiner-fn topic-config other-topic-config)))
+
+  (left-join
+    [_ ktable value-joiner-fn topic-config other-topic-config join-name]
+    (configured-kstream
+     config
+     (left-join kstream ktable value-joiner-fn topic-config other-topic-config join-name)))
 
   (filter
     [_ predicate-fn]
@@ -136,12 +142,15 @@
     [_ topic-config]
     (to! kstream topic-config))
 
-  IKStream
+  IKStreamA
   (branch
     [_ predicate-fns]
     (mapv (partial configured-kstream config)
           (branch kstream predicate-fns)))
-
+  (branch
+    [_ predicate-fns branch-name]
+    (mapv (partial configured-kstream config)
+          (branch kstream predicate-fns branch-name)))
   (flat-map
     [_ key-value-mapper-fn]
     (configured-kstream
@@ -170,6 +179,7 @@
      config
      (group-by-key kstream topic-config)))
 
+  IKStreamB
   (join-windowed
     [_ other-kstream value-joiner-fn windows]
     (configured-kstream
@@ -190,6 +200,18 @@
                     topic-config
                     other-topic-config)))
 
+  (join-windowed
+    [_ other-kstream value-joiner-fn windows topic-config other-topic-config join-name]
+    (configured-kstream
+     config
+     (join-windowed kstream
+                    other-kstream
+                    value-joiner-fn
+                    windows
+                    topic-config
+                    other-topic-config
+                    join-name)))
+
   (left-join-windowed
     [_ other-kstream value-joiner-fn windows]
     (configured-kstream
@@ -207,6 +229,18 @@
                          topic-config
                          other-topic-config)))
 
+  (left-join-windowed
+    [_ other-kstream value-joiner-fn windows topic-config other-topic-config join-name]
+    (configured-kstream
+     config
+     (left-join-windowed kstream
+                         other-kstream
+                         value-joiner-fn
+                         windows
+                         topic-config
+                         other-topic-config
+                         join-name)))
+
   (map
     [_ key-value-mapper-fn]
     (configured-kstream
@@ -216,9 +250,9 @@
   (merge
     [_ other-kstream]
     (configured-kstream
-      config
-      (merge kstream
-             other-kstream)))
+     config
+     (merge kstream
+            other-kstream)))
 
   (outer-join-windowed
     [_ other-kstream value-joiner-fn windows]
@@ -240,6 +274,18 @@
                           topic-config
                           other-topic-config)))
 
+  (outer-join-windowed
+    [_ other-kstream value-joiner-fn windows topic-config other-topic-config join-name]
+    (configured-kstream
+     config
+     (outer-join-windowed kstream
+                          other-kstream
+                          value-joiner-fn
+                          windows
+                          topic-config
+                          other-topic-config
+                          join-name)))
+
   (process!
     [_ processor-supplier-fn state-store-names]
     (process! kstream processor-supplier-fn state-store-names))
@@ -251,7 +297,7 @@
      (select-key kstream key-value-mapper-fn)))
 
   (transform
-      [this transformer-supplier-fn]
+    [this transformer-supplier-fn]
     (transform this transformer-supplier-fn []))
 
   (transform
@@ -261,7 +307,7 @@
      (transform kstream transformer-supplier-fn state-store-names)))
 
   (transform-values
-      [this value-transformer-supplier-fn]
+    [this value-transformer-supplier-fn]
     (transform-values this value-transformer-supplier-fn []))
 
   (transform-values
@@ -273,14 +319,26 @@
   (left-join-global
     [_ global-ktable kv-mapper joiner]
     (configured-kstream
-      config
-      (left-join-global kstream global-ktable kv-mapper joiner)))
+     config
+     (left-join-global kstream global-ktable kv-mapper joiner)))
+
+  (left-join-global
+    [_ global-ktable kv-mapper joiner join-name]
+    (configured-kstream
+     config
+     (left-join-global kstream global-ktable kv-mapper joiner join-name)))
 
   (join-global
     [_ global-ktable kv-mapper joiner]
     (configured-kstream
-      config
-      (join-global kstream global-ktable kv-mapper joiner)))
+     config
+     (join-global kstream global-ktable kv-mapper joiner)))
+
+  (join-global
+    [_ global-ktable kv-mapper joiner join-name]
+    (configured-kstream
+     config
+     (join-global kstream global-ktable kv-mapper joiner join-name)))
 
   (kstream* [_]
     (kstream* kstream))

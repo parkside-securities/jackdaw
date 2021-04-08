@@ -9,7 +9,7 @@
             [jackdaw.streams.lambdas.specs]
             [jackdaw.streams.mock :as mock]
             [jackdaw.streams.protocols
-             :refer [IKStream IKTable IStreamsBuilder]]
+             :refer [IKStreamA IKStreamB IKTable IStreamsBuilder]]
             [jackdaw.streams.specs])
   (:import [java.time Duration]
            [org.apache.kafka.streams.kstream
@@ -34,7 +34,7 @@
           kstream-a (-> streams-builder
                         (k/kstream (mock/topic "topic-a")))]
 
-      (is (satisfies? IKStream kstream-a))))
+      (is (or (satisfies? IKStreamA kstream-a) (satisfies? IKStreamB kstream-a)))))
 
   (testing "kstreams"
     (let [streams-builder (mock/streams-builder)
@@ -42,7 +42,7 @@
                       (k/kstreams [(mock/topic "topic-a")
                                    (mock/topic "topic-b")]))]
 
-      (is (satisfies? IKStream kstream))))
+      (is (or (satisfies? IKStreamA kstream) (satisfies? IKStreamB kstream)))))
 
   (testing "ktable"
     (let [streams-builder (mock/streams-builder)
@@ -315,6 +315,7 @@
     (let [topic-a (mock/topic "topic-a")
           topic-b (mock/topic "topic-b")
           topic-c (mock/topic "topic-c")
+          topic-d (mock/topic "topic-d")
           windows (JoinWindows/of 1000)
           driver (mock/build-driver (fn [builder]
                                       (let [left-kstream (k/kstream builder topic-a)
@@ -325,14 +326,23 @@
                                                              windows
                                                              topic-a
                                                              topic-b)
-                                            (k/to topic-c)))))
+                                            (k/to topic-c))
+                                        (-> left-kstream
+                                            (k/join-windowed right-kstream
+                                                             +
+                                                             windows
+                                                             topic-a
+                                                             topic-b
+                                                             "a-b-windowed-join")
+                                            (k/to topic-d)))))
           publish-a (partial mock/publish driver topic-a)
           publish-b (partial mock/publish driver topic-b)]
 
       (publish-a 1 1 1)
       (publish-b 100 1 2)
       (publish-b 10000 1 4) ;; Outside of join window
-      (is (= [[1 3]] (mock/get-keyvals driver topic-c)))))
+      (is (= [[1 3]] (mock/get-keyvals driver topic-c)))
+      (is (= [[1 3]] (mock/get-keyvals driver topic-d)))))
 
   (testing "map"
     (let [topic-a (mock/topic "topic-a")
