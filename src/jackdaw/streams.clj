@@ -60,7 +60,9 @@
   ([kstream ktable value-joiner-fn]
    (p/left-join kstream ktable value-joiner-fn))
   ([kstream ktable value-joiner-fn this-topic-config other-topic-config]
-   (p/left-join kstream ktable value-joiner-fn this-topic-config other-topic-config)))
+   (p/left-join kstream ktable value-joiner-fn this-topic-config other-topic-config))
+  ([kstream ktable value-joiner-fn this-topic-config other-topic-config join-name]
+   (p/left-join kstream ktable value-joiner-fn this-topic-config other-topic-config join-name)))
 
 (defn filter
   [kstream predicate-fn]
@@ -112,8 +114,10 @@
 (defn branch
   "Returns a list of KStreams, one for each of the `predicate-fns`
   provided."
-  [kstream predicate-fns]
-  (p/branch kstream predicate-fns))
+  ([kstream predicate-fns]
+   (p/branch kstream predicate-fns))
+  ([kstream predicate-fns branch-name]
+   (p/branch kstream predicate-fns branch-name)))
 
 (defn flat-map
   "Creates a KStream that will consist of the concatenation of messages
@@ -146,7 +150,9 @@
   ([kstream other-kstream value-joiner-fn windows]
    (p/join-windowed kstream other-kstream value-joiner-fn windows))
   ([kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config]
-   (p/join-windowed kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config)))
+   (p/join-windowed kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config))
+  ([kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config join-name]
+   (p/join-windowed kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config join-name)))
 
 (defn left-join-windowed
   "Combines the values of two streams that share the same key using a
@@ -154,7 +160,9 @@
   ([kstream other-kstream value-joiner-fn windows]
    (p/left-join-windowed kstream other-kstream value-joiner-fn windows))
   ([kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config]
-   (p/left-join-windowed kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config)))
+   (p/left-join-windowed kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config))
+  ([kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config join-name]
+   (p/left-join-windowed kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config join-name)))
 
 (defn map
   "Creates a KStream that consists of the result of applying
@@ -168,7 +176,9 @@
   ([kstream other-kstream value-joiner-fn windows]
    (p/outer-join-windowed kstream other-kstream value-joiner-fn windows))
   ([kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config]
-   (p/outer-join-windowed kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config)))
+   (p/outer-join-windowed kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config))
+  ([kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config join-name]
+   (p/outer-join-windowed kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config join-name)))
 
 (defn process!
   "Applies `processor-fn` to each item in the input stream."
@@ -203,12 +213,16 @@
    (p/transform-values kstream value-transformer-supplier-fn state-store-names)))
 
 (defn join-global
-  [kstream global-ktable kv-mapper joiner]
-  (p/join-global kstream global-ktable kv-mapper joiner))
+  ([kstream global-ktable kv-mapper joiner]
+   (p/join-global kstream global-ktable kv-mapper joiner))
+  ([kstream global-ktable kv-mapper joiner join-name]
+   (p/join-global kstream global-ktable kv-mapper joiner join-name)))
 
 (defn left-join-global
-  [kstream global-ktable kv-mapper joiner]
-  (p/left-join-global kstream global-ktable kv-mapper joiner))
+  ([kstream global-ktable kv-mapper joiner]
+   (p/left-join-global kstream global-ktable kv-mapper joiner))
+  ([kstream global-ktable kv-mapper joiner join-name]
+   (p/left-join-global kstream global-ktable kv-mapper joiner join-name)))
 
 (defn merge
   [kstream other]

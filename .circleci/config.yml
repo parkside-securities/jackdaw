@@ -43,21 +43,21 @@ references:
   test_config: &test_config
     docker:
       - image: circleci/clojure:lein-2.9.1
-      - image: confluentinc/cp-zookeeper:5.3.1
+      - image: confluentinc/cp-zookeeper:5.4.1
         environment:
           ZOOKEEPER_CLIENT_PORT: 2181
-      - image: confluentinc/cp-kafka:5.3.1
+      - image: confluentinc/cp-kafka:5.4.1
         environment:
           KAFKA_BROKER_ID: 1
           KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
           KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
           KAFKA_ZOOKEEPER_CONNECT: localhost:2181
-      - image: confluentinc/cp-schema-registry:5.3.1
+      - image: confluentinc/cp-schema-registry:5.4.1
         environment:
           SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: localhost:2181
           SCHEMA_REGISTRY_HOST_NAME: localhost
           SCHEMA_REGISTRY_LISTENERS: http://localhost:8081
-      - image: confluentinc/cp-kafka-rest:5.3.1
+      - image: confluentinc/cp-kafka-rest:5.4.1
         environment:
           KAFKA_REST_ZOOKEEPER_CONNECT: localhost:2181
           KAFKA_REST_LISTENERS: http://0.0.0.0:8082
@@ -115,8 +115,6 @@ jobs:
     steps:
       - *restore_repo
       - *restore_mvn
-      - setup_remote_docker:
-          docker_layer_caching: true
       - run:
           lein kaocha --plugin kaocha.plugin/junit-xml --junit-xml-file test-results/kaocha/results.xml --plugin cloverage --codecov
       - store_artifacts:
@@ -137,7 +135,7 @@ jobs:
       - run:
           name: Prepare signing key
           command: |
-            echo $GPG_PRIVATE_KEY |base64 --decode |gpg --yes --batch --import
+            echo -e $GPG_PRIVATE_KEY |gpg --yes  --import
 
       - run:
           name: Deploy to Clojars
@@ -192,6 +190,6 @@ workflows:
             - checkout_tags
           filters:
             tags:
-              only: /^\d+\.\d+\.\d+$/
+              only: /^\d+\.\d+\.\d+.*$/
             branches:
               ignore: /.*/
