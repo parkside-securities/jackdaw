@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [1.0.0] - [2021-04-08]
 * Remove fressian support to avoid conflict with in house fression
 * Upgrade kafka client and kafka stream to 2.7
 * Split IKstream into several interfaces to allow definitions of more methods
