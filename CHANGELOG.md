@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## [1.0.0] - [2021-04-08]
+* Remove fressian support to avoid conflict with in house fression
+* Upgrade kafka client and kafka stream to 2.7
+* Split IKstream into several interfaces to allow definitions of more methods
+* Add naming support to left-join, branch, join-windowed, left-join-windowed, join-global, left-join-global
 
 ## [0.7.8] - [2021-03-01]
 * Override the netty version pulled by Aleph with one which fixes https://nvd.nist.gov/vuln/detail/CVE-2020-11612 [#261](https://github.com/FundingCircle/jackdaw/pull/261)

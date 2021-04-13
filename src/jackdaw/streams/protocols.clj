@@ -40,6 +40,7 @@
   (left-join
     [kstream-or-ktable ktable value-joiner-fn]
     [kstream-or-ktable ktable value-joiner-fn this-topic-config other-topic-config]
+    [kstream-or-ktable ktable value-joiner-fn this-topic-config other-topic-config join-name]
     "Creates a KStream from the result of calling `value-joiner-fn` with
     each element in the KStream and the value in the KTable with the same
     key.")
@@ -73,10 +74,11 @@
     [kstream-or-ktable file-path topic-config]
     "Writes the elements of a stream to a file at the given path."))
 
-(defprotocol IKStream
+(defprotocol IKStreamA
   "A KStream is an abstraction of a stream of key-value pairs."
   (branch
     [kstream predicate-fns]
+    [kstream predicate-fns branch-name]
     "Returns a list of KStreams, one for each of the `predicate-fns`
     provided.")
 
@@ -112,17 +114,20 @@
   (group-by-key
     [kstream]
     [kstream topic-config]
-    "Groups records with the same key into a KGroupedStream.")
+    "Groups records with the same key into a KGroupedStream."))
 
+(defprotocol IKStreamB
   (join-windowed
     [kstream other-kstream value-joiner-fn windows]
     [kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config]
+    [kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config join-name]
     "Combines the values of two streams that share the same key using a
     windowed inner join.")
 
   (left-join-windowed
     [kstream other-kstream value-joiner-fn windows]
     [kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config]
+    [kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config join-name]
     "Combines the values of two streams that share the same key using a
     windowed left join.")
 
@@ -138,6 +143,7 @@
   (outer-join-windowed
     [kstream other-kstream value-joiner-fn windows]
     [kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config]
+    [kstream other-kstream value-joiner-fn windows this-topic-config other-topic-config join-name]
     "Combines the values of two streams that share the same key using a
     windowed outer join.")
 
@@ -168,10 +174,12 @@
     to each value in the input stream.")
 
   (join-global
-    [kstream global-ktable kv-mapper joiner])
+    [kstream global-ktable kv-mapper joiner]
+    [kstream global-ktable kv-mapper joiner join-name])
 
   (left-join-global
-    [kstream global-ktable kv-mapper joiner])
+    [kstream global-ktable kv-mapper joiner]
+    [kstream global-ktable kv-mapper joiner join-name])
 
   (kstream*
     [kstream]
